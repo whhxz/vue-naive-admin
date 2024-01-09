@@ -104,6 +104,7 @@
 import { throttle, lStorage } from '@/utils'
 import { useStorage } from '@vueuse/core'
 import api from './api'
+import { loginApi } from '@/api'
 import { useUserStore, useAuthStore } from '@/store'
 import { initUserAndPermissions } from '@/router'
 
@@ -121,6 +122,7 @@ const loginInfo = ref({
   username: '',
   password: '',
 })
+
 function initLoginInfo() {
   const localLoginInfo = lStorage.get('loginInfo')
   if (localLoginInfo) {
@@ -131,7 +133,7 @@ function initLoginInfo() {
 
 const captchaUrl = ref('')
 const initCaptcha = throttle(() => {
-  captchaUrl.value = '/api/auth/captcha?' + Date.now()
+  captchaUrl.value = loginApi.captcha() + '?' + new Date().getTime()
 }, 500)
 
 if (isLogined.value) {
@@ -149,6 +151,7 @@ function quickLogin() {
 
 const isRemember = useStorage('isRemember', true)
 const loading = ref(false)
+
 async function handleLogin(isQuick) {
   const { username, password, captcha } = loginInfo.value
   if (!username || !password) return $message.warning('请输入用户名和密码')

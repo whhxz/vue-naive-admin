@@ -7,7 +7,8 @@
  **********************************/
 
 import { request } from '@/utils'
-
+import * as login from './login'
+export const loginApi = login
 export default {
   // 获取用户信息
   getUser: () => request.get('/user/detail'),

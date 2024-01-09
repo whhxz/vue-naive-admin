@@ -20,7 +20,7 @@ import { pluginPagePathes, pluginIcons } from './build/plugin-isme'
 export default defineConfig(({ command, mode }) => {
   const isBuild = command === 'build'
   const viteEnv = loadEnv(mode, process.cwd())
-  const { VITE_TITLE, VITE_PUBLIC_PATH, VITE_PROXY_TARGET } = viteEnv
+  const { VITE_TITLE, VITE_PUBLIC_PATH, VITE_PROXY_TARGET, VITE_PROXY_NEW_TARGET } = viteEnv
 
   return {
     base: VITE_PUBLIC_PATH || '/',
@@ -63,7 +63,18 @@ export default defineConfig(({ command, mode }) => {
         '/api': {
           target: VITE_PROXY_TARGET,
           changeOrigin: true,
-          rewrite: (path) => path.replace(new RegExp('^/api'), ''),
+          rewrite: (path) => path.replace(/^\/api/, ''),
+          configure: (proxy, options) => {
+            // 配置此项可在响应头中看到请求的真实地址
+            proxy.on('proxyRes', (proxyRes, req) => {
+              proxyRes.headers['x-real-url'] = new URL(req.url || '', options.target)?.href || ''
+            })
+          },
+        },
+        '/newApi': {
+          target: VITE_PROXY_NEW_TARGET,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/newApi/, ''),
           configure: (proxy, options) => {
             // 配置此项可在响应头中看到请求的真实地址
             proxy.on('proxyRes', (proxyRes, req) => {
